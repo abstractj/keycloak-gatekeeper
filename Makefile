@@ -1,6 +1,6 @@
 NAME=keycloak-gatekeeper
-AUTHOR=keycloak
-REGISTRY=docker.io
+AUTHOR=abstractj
+REGISTRY=quay.io
 GOVERSION ?= 1.10.2
 ROOT_DIR=${PWD}
 HARDWARE=$(shell uname -m)

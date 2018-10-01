@@ -1,37 +1,34 @@
 env:
   global:
-  - REGISTRY_USERNAME=gambol99+rebotbuilder
+  - REGISTRY_USERNAME=abstractj
   - REGISTRY=quay.io
-  - secure: L2Cx0t8rSc1x3bvVbC3ONSkw5i/b5sznvZFSrzxL7iaDjVIGxSFNYo7J0u3eKQh3+X/IxVvjsCSY/LyKErODzCsiv88BnpGvVRsu+Mq78NFMgrcPetXA/S0X/IEOfqiQ8F+a/7NNY+KJEEfKROwRrPbKx7bUpB+jkPQr5Hiyh77i0jcEl8ZKr/3zyuQBr5QMS7j9CQTkR7/vqi2Cd2LE4vxwC7Vi9cjs9fv64XeDfRY5eUJX7DZUs9M73lhQ5HwId40nNPjncrjRdQwAfmkbt2skV5v9xcPeuKvvynFy+11mkINMOR7PEK6nvyYq9bbAxarxSvYjRvPC1uIlXSHDO9FlEXzR0iAy26m0o9dOYloCs1mARFvOqPGWdxH6XXGSG4MtREpTXGFmIcStUCQGvMhY7NttYjD2leZTvPP99tODcUa6KQiQvH4ycPRmOwmgR496n+uW9IZWSEG1soRWZwxGJKxJVvwgt64V9UWWlxhb8+nAs/Ka1Lr8PqBKNNMjLBvLVIEOEldJz6Vk5fu3CtUIfxwMXwSfGmzPB1JZK5yB9Rc8vciPtaM6JaSAeTcp0e8SMOgUrk5lv9p72T5NvOh3U4DF4qvznK7saT20RHJF9080VQRyb/0m065oCn25ynvSJI9LZ5jzF5uQ+0D0mXnwnpUbWPopLf1NwKrS27Y=
-  - secure: jX+wrfNA7TA0T+WVjQvg/WYWldaajobpsAMHVh+ZrvrnkfUeWyy7wS8ZccR+xAEMMXWRnVe1aLGhvWJdtoWV5/UAD0iPz8oqudlE17i1Jmt2aP3sl2mrnCRklIzVJoWIFNIWVlsZON9FkRcb3lbSM9BzWanYLpXB+cDaIHqFVAucL3iIBCAIb5LqVwBN0gM+mcbw1imlXkDnNAS/3rNEd+WGs5S7pJCFvVSmbwKV3362V+PUe8SxfT2MTyxUVkFXtiWIbcwPDTXir2QkPeyjDBh7DxXBl9jZqaTRMV6mz0/PsFpb8Z2M+gcLIucqET2LnK1DskkHCj3+RGbbbXsLt3q9BbM/VZvAfYkknMN/bXoB854RPXS7y1IhfuNs/fiHz/BFJKuYNKgXowjt455varO8Q7nXsz3gYf0N64S2fEHH0P8EL53iGHHHeKSIck5OCvaVY58oiIGzHgsWrFvJG00fEZjIeJL2wt+yfGsyj1FgsucB1SKnEpvSrbCcP3fQKKEZUmezAZo6LgXODxyIXC3QeVK7AZVRWqja72iaBD1yURk4VxMzVg95WqzFkkAxA/hZ4ViPZCEQQ6rsHJ7ubAEk8KafRmL3SsDTEewsrG0WQiH3xeswIPkLJ5dxAKONFzfYz1EI88N/VmoB6OcVt6bCUPyDxcQuvpCtOgD8eXk=
-  - secure: AzF7+iG4pQs8lwjxG72yhDiHwOV/oFwhwjwlF4kg80vnzIDkjdM0cbsHTN/g4Gk8GKYY3uRVk6cbbPjNT4EWg6OgxBOp5X6yAbxoRaMhewNvwxi5L8DzaL94/GurlG6mf6X0nSY8dNCTEBQyk5J+43TTolnwlZxcVoJ083WUsSpwPzpd36DAKvw8lOrsld+p8XukczvFBOjNdNiazbMMjt3fFk/9YuueaRSiR7kgd91jqv5SChezhEdiFEsOMKwMQTxi38H0m7S+rjD+WHqEtXO/8TtCjjZK27UA3dp0HU+u3sldADp6m9Nnwo5DPq8wx2XteVO09lrfiey87G556btPdWjcWArK9B4WkDfFRZx99np+LQI9vYePo+cmC0lOQBBK90QSe/8G0M3iA3Sx5QIVg6G9RM7dBjVAbWXjaCKllufaeiKeHZ6JQMZd7jo7oCo7cyB5ZbjbCsQ8k9ZPAfTz1rrHjxwl2Dt8ITRB2P6ZzMva9xnZQo+aGQp6njh3QX9GtbQAX1zIY4bRUQ1RXKaJuarjJBkUqfoON1XOsv8cA2lTs8mU/U+YijIfAeUDkiq2pV7VIcZ8Op4wNj0tkT3jXbFNswAl20NHWO8yJ2rIBcbTxQuFDEXRg3B+CdaB/doRCXtLpw8e9XsqcGqxMDmJVyZ6uOgW6aUsRDMdj0E=
+  - secure: kYgaGPRfKSHd68xE+XFUMzvcxT+G5J5MMLGYQFEajOz5uRCite8AWYcT3F4qA402uS3arZVMcbbahcEZ8vajavB81L4XcMz+QDLNuq1HvoZe6WRBFXf3EpXlsAf+y34R6O6hMVFu7Zu7vMoVr1L/M7FV/EssroatEtDpmGrNZDSJNEBYUID72iCZndw7TICg3bSKfpvnS6TqcZH09iA8NuUHdIw8UPkhRrjUBG8ynQyXoVfcUR4GhrZYdwXukocUEtMWOxp7KJGlvnGtMf9OjWUCY7drdw0yKTF0z7dINFYZBG2aMjHATBRuTWqp52AVG488J3ugfANtVwDrBkDivrKaMGqnH63nP21lkNz/Bnp0ymYqRepA6vIaGyi9a7O6yrvhpJJrBCxIb7s9AImN+hW7hbrvsVUJLGH/iMZwYySDPAQjlQIRcSRnsMrQZBn6D2TLr+DNIz5jlkLbRQKUO1xHNOYCRykxZ79LFA2D3mifRSbjWVEz6xGyG5IFWHCI65HqhOK66k8+O9GFQFzXjyoz//DFAp2dBeRFau98kTp26woK4WeIBO9hUM5zsG4jM+Fn8z2p0nVDtiOhVF1o8U4/2KzSUEpgkkRfDwAyNAYMsqecHV7xv/qLiN0UtwmN9g9Q5aibgjP2+K4L1b3DyQSZ+FHnVELx+0qyisBaIa0=
+  - secure: DuK7Ww7yiHdV9k1g9dWfKk0bxafHnWBDMX9uwEHcH39G3qvblDrsR8rMvQBW+05KdF2MHFnKnGXa/pyHdwJITiTcbwr+vtlVvAnfxcqwa5Mo1LC/OM+HyTy+vQFcd//hs6wV2DZrmTeIFc7Xa8/43BonO0oo/BBAP48JCvrj885hpXLZzSP31k9yyuwclnfRJIa9UcOYBIWFVmp/0aNWLGDH/nmuuFAzHi5iLY2Gh8Vwu0ZUn7646U7xTQ+re2mL6auUWM2u1TinxTURmU9eAO3wycUe/kpd0cPwZFJKTUD2TkB6tV92PPT5ZiAlsHuOoA9A+dwNaE/EfkAnLx7ogpCgv+ja388YweJLdcvat/87UituHmDWMFjWXSWXKUHhJHLtronfl6FXGweJPW+UuCrU4vGb/R0H6mXYzbV0UU2TW16tjVo+mp0NVsdXEMTESusKUJ3sIEPVSSscM7dUbQgLFWouMma62mktk2wSW6YDTGKM9MiwF0s5VFujBPkPpX6kXIhqRNeNDRPrT5RsZgQeI1GX/RouhYm1XIIOZalAWDcPJ6YCPC6eIUiqP3XETtKsIRbKhRvIrbiezWe0KpL6Vt4tZUSPSA/dVWxw3J79uyMOMoTsg0pxIpzjnGXUkN+PF/+ZOLnp1pNFTJTsPHm1vamYfNQ1sDGIBzrsc1w=
+  - secure: tzocD0xQrZjpKmiYEFdXPOe+ds7oFlb0PkdPXw3LeVRW26DU8e40iYXMNh1/KC7aQK2GCIJ8QjpPVDqj62uglt37z71j7MP5hgRxtKk//V7U7PFbqhIolkTwhZjH26tbTijqTrmCbJIr9zAyrP+IXubIoSp6xvPQ1KBOd0Vo5SZZsEp0jMl8DFozuu0as4vyDNvJdOkpQW+nvNrQc9S6QMl83A/JbtMJvS2mAXpg1ToAMUVAjk99Ku9l6d1R6Q4oggUssu5gKVTxOFHeqMkQcx2izZgXbJxW/LOSayMHnhixkZjhsCeZmG1TvgTO6ZD1uDNktbHoNTexSD3Ap+PjJi8r+BlERiDSxAYATOL09B2W4dSUJ85hg97nHlv5gq5QgALH3sEvxr2/ApflTzQtuwQniyg9F0tV2gsVhNFYMDbvSIFbdtssl6mIPcz83wxecnKuK+JW6aOzSLvlL30TJj16xfA/Afmd1riO18b0wPPbQ0Qrr3a5nuYvyim1omIhsTGcQL+sHrm8BOLOuYfF8HmqK/YMVXV38L3M/54du/7uxeo/An/wkXDdzMWW0WdqUG0rRp0xrN6EpCzA+NktLO1fbGvpq1XGRP3Ed8PqJFXiP7baBgfK0r8mp1paCVaHPGfV9IBdup9aNQV4GIUoaFfQcFCfp0WwCVKxAGYtlgU=
 services:
 - docker
 language: go
 go:
-- "1.10.2"
+- 1.10.2
 install:
 - go get -u github.com/golang/dep/cmd/dep
 - go get github.com/mattn/goveralls
 - go get -u github.com/client9/misspell/cmd/misspell
 script:
 - make test
-- if ([[ ${TRAVIS_BRANCH} == "master" ]] && [[ ${TRAVIS_EVENT_TYPE} == "push" ]]) || [[ -n ${TRAVIS_TAG} ]]; then
-    NAME=GOOS=windows GOARCH=amd64 go build -o bin/keycloak-gatekeeper-windows-amd64.exe;
-    NAME=GOOS=linux GOARCH=amd64 go build -o bin/keycloak-gatekeeper-linux-amd64;
-    docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_TOKEN} ${REGISTRY};
-    VERSION=${TRAVIS_TAG:-latest} make docker-release;
-  fi
-- if ([[ ${TRAVIS_BRANCH} == "master" ]] && [[ ${TRAVIS_EVENT_TYPE} == "push" ]]); then
-    go get github.com/mattn/goveralls;
-    goveralls -service=travis-ci;
-    make bench;
+- if ([[ ${TRAVIS_BRANCH} == "master" ]] && [[ ${TRAVIS_EVENT_TYPE} == "push" ]])
+  || [[ -n ${TRAVIS_TAG} ]]; then NAME=GOOS=windows GOARCH=amd64 go build -o bin/keycloak-gatekeeper-windows-amd64.exe;
+  NAME=GOOS=linux GOARCH=amd64 go build -o bin/keycloak-gatekeeper-linux-amd64; docker
+  login -u ${REGISTRY_USERNAME} -p ${REGISTRY_TOKEN} ${REGISTRY}; VERSION=${TRAVIS_TAG:-latest}
+  make docker-release; fi
+- if ([[ ${TRAVIS_BRANCH} == "master" ]] && [[ ${TRAVIS_EVENT_TYPE} == "push" ]]);
+  then go get github.com/mattn/goveralls; goveralls -service=travis-ci; make bench;
   fi
 deploy:
   provider: releases
   skip_cleanup: true
   on:
-    repo: keycloak/keycloak-gatekeeper
+    repo: abstractj/keycloak-gatekeeper
     tags: true
   api_key:
     secure: "${GITHUB_TOKEN}"

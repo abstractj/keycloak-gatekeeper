@@ -11,8 +11,10 @@ DEPS=$(shell go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 PACKAGES=$(shell go list ./...)
 LFLAGS ?= -X main.gitsha=${GIT_SHA} -X main.compiled=${BUILD_TIME}
 VETARGS ?= -asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
+PLATFORMS=darwin linux windows
+ARCHITECTURES=386 amd64
 
-.PHONY: test authors changelog build docker static release lint cover vet glide-install
+.PHONY: test authors changelog build build-all docker static release lint cover vet glide-install
 
 default: build
 
@@ -24,6 +26,11 @@ build: golang
 	@echo "--> Compiling the project"
 	@mkdir -p bin
 	go build -ldflags "${LFLAGS}" -o bin/${NAME}
+
+build-all: golang deps
+	$(foreach GOOS, $(PLATFORMS),\
+	$(foreach GOARCH, $(ARCHITECTURES), $(shell [ $(GOOS) = "windows" ]  && EXT=".exe"; env GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 \
+	go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME}-$(GOOS)-$(GOARCH)$$EXT)))
 
 static: golang deps
 	@echo "--> Compiling the static binary"
@@ -66,10 +73,10 @@ certs:
 		-profile=server \
 		tests/proxy-csr.json | cfssljson -bare tests/proxy
 
-release: static
+release: clean build-all
 	mkdir -p release
-	gzip -c bin/${NAME} > release/${NAME}_${VERSION}_linux_${HARDWARE}.gz
-	rm -f release/${NAME}
+	gzip -k bin/*
+	mv bin/*.gz release/
 
 clean:
 	rm -rf ./bin 2>/dev/null

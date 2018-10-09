@@ -12,7 +12,7 @@ PACKAGES=$(shell go list ./...)
 LFLAGS ?= -X main.gitsha=${GIT_SHA} -X main.compiled=${BUILD_TIME}
 VETARGS ?= -asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
 PLATFORMS=darwin linux windows
-ARCHITECTURES=386 amd64
+ARCHITECTURES=amd64
 
 .PHONY: test authors changelog build build-all docker static release lint cover vet glide-install
 
@@ -27,10 +27,12 @@ build: golang
 	@mkdir -p bin
 	go build -ldflags "${LFLAGS}" -o bin/${NAME}
 
-build-all: golang deps
+release: clean golang deps
+	@mkdir -p release
 	$(foreach GOOS, $(PLATFORMS),\
 	$(foreach GOARCH, $(ARCHITECTURES), $(shell [ $(GOOS) = "windows" ]  && EXT=".exe"; env GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 \
-	go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME}-$(GOOS)-$(GOARCH)$$EXT)))
+	go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME}$$EXT; \
+	tar -czvf ${NAME}-$(GOOS)-$(GOARCH).tar.gz -C bin/ ${NAME}$$EXT >/dev/null)))
 
 static: golang deps
 	@echo "--> Compiling the static binary"
@@ -72,11 +74,6 @@ certs:
 		-config=tests/ca-config.json \
 		-profile=server \
 		tests/proxy-csr.json | cfssljson -bare tests/proxy
-
-release: clean build-all
-	mkdir -p release
-	gzip -k bin/*
-	mv bin/*.gz release/
 
 clean:
 	rm -rf ./bin 2>/dev/null

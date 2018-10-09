@@ -32,7 +32,7 @@ release: clean golang deps
 	$(foreach GOOS, $(PLATFORMS),\
 	$(foreach GOARCH, $(ARCHITECTURES), $(shell [ $(GOOS) = "windows" ]  && EXT=".exe"; env GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 \
 	go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME}$$EXT; \
-	tar -czvf ${NAME}-$(GOOS)-$(GOARCH).tar.gz -C bin/ ${NAME}$$EXT >/dev/null)))
+	tar -czvf release/${NAME}-$(GOOS)-$(GOARCH).tar.gz -C bin/ ${NAME}$$EXT >/dev/null)))
 
 static: golang deps
 	@echo "--> Compiling the static binary"
@@ -76,8 +76,8 @@ certs:
 		tests/proxy-csr.json | cfssljson -bare tests/proxy
 
 clean:
-	rm -rf ./bin 2>/dev/null
-	rm -rf ./release 2>/dev/null
+	rm -rf ./bin/* 2>/dev/null
+	rm -rf ./release/* 2>/dev/null
 
 authors:
 	@echo "--> Updating the AUTHORS"

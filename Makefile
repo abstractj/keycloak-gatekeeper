@@ -27,14 +27,14 @@ build: golang
 	@mkdir -p bin
 	go build -ldflags "${LFLAGS}" -o bin/${NAME}
 
-release: clean golang deps
+release: clean golang
 	mkdir -p release
 	$(foreach GOOS, $(PLATFORMS),\
 	$(foreach GOARCH, $(ARCHITECTURES), $(shell [ $(GOOS) = "windows" ]  && EXT=".exe"; env GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME}$$EXT; \
 	tar -czvf release/${NAME}-$(GOOS)-$(GOARCH).tar.gz -C bin/ ${NAME}$$EXT >/dev/null; \
   sha1sum release/${NAME}-$(GOOS)-$(GOARCH).tar.gz | cut -d " " -f1 > release/${NAME}-$(GOOS)-$(GOARCH).tar.gz.sha1 )))
 
-static: golang deps
+static: golang
 	@echo "--> Compiling the static binary"
 	@mkdir -p bin
 	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags "-w ${LFLAGS}" -o bin/${NAME}
@@ -82,15 +82,6 @@ clean:
 authors:
 	@echo "--> Updating the AUTHORS"
 	git log --format='%aN <%aE>' | sort -u > AUTHORS
-
-dep-install:
-	echo "--> Installing dependencies"
-	dep ensure
-
-deps:
-	echo "--> Installing build dependencies"
-	go get -u github.com/golang/dep/cmd/dep
-	$(MAKE) dep-install
 
 vet:
 	@echo "--> Running go vet $(VETARGS) ."
@@ -146,9 +137,6 @@ spelling:
 
 test:
 	@echo "--> Running the tests"
-	@if [ ! -d "vendor" ]; then \
-		make dep-install; \
-  fi
 	@go test -v
 	@$(MAKE) golang
 	@$(MAKE) gofmt

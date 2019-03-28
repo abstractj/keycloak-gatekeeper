@@ -10,7 +10,7 @@ VERSION ?= $(shell awk '/release.*=/ { print $$3 }' doc.go | sed 's/"//g')
 DEPS=$(shell go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 PACKAGES=$(shell go list ./...)
 LFLAGS ?= -X main.gitsha=${GIT_SHA} -X main.compiled=${BUILD_TIME}
-VETARGS ?= -asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
+VETARGS ?= -asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -shift -unsafeptr
 PLATFORMS=darwin linux windows
 ARCHITECTURES=amd64
 
@@ -85,10 +85,14 @@ authors:
 
 vet:
 	@echo "--> Running go vet $(VETARGS) ."
-	@go tool vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
+	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
 	fi
-	@go tool vet $(VETARGS) *.go
+	@go version | grep '1.12' 2>/dev/null ; if [[ $$? -eq 1 ]]; then \
+    go vet $(VETARGS) -structtags *.go; \
+		else \
+    go vet $(VETARGS) -structtag *.go; \
+	fi
 
 lint:
 	@echo "--> Running golint"

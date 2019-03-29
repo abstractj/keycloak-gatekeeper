@@ -88,9 +88,10 @@ vet:
 	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
 	fi
-	@go version | grep '1.12' 2>/dev/null ; if [[ $$? -eq 1 ]]; then \
+	@go version | grep '1.11' 2>/dev/null ; if [[ $$? -eq 0 ]]; then \
     go vet $(VETARGS) -structtags *.go; \
-		else \
+	fi
+	@go version | grep '1.12' 2>/dev/null ; if [[ $$? -eq 0 ]]; then \
     go vet $(VETARGS) -structtag *.go; \
 	fi
 

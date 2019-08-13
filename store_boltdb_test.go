@@ -65,7 +65,7 @@ func TestNewBoltDBStore(t *testing.T) {
 func TestBoltSet(t *testing.T) {
 	s := newTestBoldDB(t)
 	defer s.close()
-	err := s.store.Set("test", "value")
+	err := s.store.Set("test", "value", 0)
 	assert.NoError(t, err)
 }
 
@@ -75,7 +75,7 @@ func TestBoltGet(t *testing.T) {
 	v, err := s.store.Get("test")
 	assert.NoError(t, err)
 	assert.Empty(t, v)
-	err = s.store.Set("test", "value")
+	err = s.store.Set("test", "value", 0)
 	assert.NoError(t, err)
 	v, err = s.store.Get("test")
 	assert.NoError(t, err)
@@ -87,7 +87,7 @@ func TestBoltDelete(t *testing.T) {
 	value := "value"
 	s := newTestBoldDB(t)
 	defer s.close()
-	err := s.store.Set(keyname, value)
+	err := s.store.Set(keyname, value, 0)
 	assert.NoError(t, err)
 	v, err := s.store.Get(keyname)
 	assert.NoError(t, err)

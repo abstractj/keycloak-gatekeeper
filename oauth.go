@@ -24,24 +24,40 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/context"
+	_oauth2 "golang.org/x/oauth2"
+
 	"github.com/coreos/go-oidc/jose"
 	"github.com/coreos/go-oidc/oauth2"
 	"github.com/coreos/go-oidc/oidc"
 )
 
-// getOAuthClient returns a oauth2 client from the openid client
-func (r *oauthProxy) getOAuthClient(redirectionURL string, clientAuthMethod string) (*oauth2.Client, error) {
-	return oauth2.NewClient(r.idpClient, oauth2.Config{
-		Credentials: oauth2.ClientCredentials{
-			ID:     r.config.ClientID,
-			Secret: r.config.ClientSecret,
+//FIXME remove constants in the future which hopefully won't be necessary in the next releases
+const (
+	GrantTypeAuthCode     = "authorization_code"
+	GrantTypeUserCreds    = "password"
+	GrantTypeRefreshToken = "refresh_token"
+)
+
+//FIXME remove constants in the future which hopefully won't be necessary in the next releases
+const (
+	ErrorInvalidGrant = "invalid_grant"
+)
+
+// getOAuthConf returns a oauth2 config
+func (r *oauthProxy) getOAuthConf(redirectionURL string) (*_oauth2.Config, error) {
+	conf := &_oauth2.Config{
+		ClientID:     r.config.ClientID,
+		ClientSecret: r.config.ClientSecret,
+		Endpoint: _oauth2.Endpoint{
+			AuthURL:  r.idp.AuthEndpoint.String(),
+			TokenURL: r.idp.TokenEndpoint.String(),
 		},
-		AuthMethod:  clientAuthMethod,
-		AuthURL:     r.idp.AuthEndpoint.String(),
 		RedirectURL: redirectionURL,
-		Scope:       append(r.config.Scopes, oidc.DefaultScope...),
-		TokenURL:    r.idp.TokenEndpoint.String(),
-	})
+		Scopes:      append(r.config.Scopes, oidc.DefaultScope...),
+	}
+
+	return conf, nil
 }
 
 // verifyToken verify that the token in the user context is valid
@@ -97,10 +113,11 @@ func getRefreshedToken(client *oidc.Client, t string) (jose.JWT, string, time.Ti
 }
 
 // exchangeAuthenticationCode exchanges the authentication code with the oauth server for a access token
-func exchangeAuthenticationCode(client *oauth2.Client, code string) (oauth2.TokenResponse, error) {
-	return getToken(client, oauth2.GrantTypeAuthCode, code)
+func exchangeAuthenticationCode(client *_oauth2.Config, code string) (*_oauth2.Token, error) {
+	return _getToken(client, oauth2.GrantTypeAuthCode, code)
 }
 
+// DEPRECATED: Never used. To be removed in the future.
 // getUserinfo is responsible for getting the userinfo from the IDPD
 func getUserinfo(client *oauth2.Client, endpoint string, token string) (jose.Claims, error) {
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
@@ -129,6 +146,7 @@ func getUserinfo(client *oauth2.Client, endpoint string, token string) (jose.Cla
 	return claims, nil
 }
 
+// DEPRECATED To be removed in the future and replaced by _getToken
 // getToken retrieves a code from the provider, extracts and verified the token
 func getToken(client *oauth2.Client, grantType, code string) (oauth2.TokenResponse, error) {
 	start := time.Now()
@@ -138,10 +156,32 @@ func getToken(client *oauth2.Client, grantType, code string) (oauth2.TokenRespon
 	}
 	taken := time.Since(start).Seconds()
 	switch grantType {
-	case oauth2.GrantTypeAuthCode:
+	case GrantTypeAuthCode:
 		oauthTokensMetric.WithLabelValues("exchange").Inc()
 		oauthLatencyMetric.WithLabelValues("exchange").Observe(taken)
-	case oauth2.GrantTypeRefreshToken:
+	case GrantTypeRefreshToken:
+		oauthTokensMetric.WithLabelValues("renew").Inc()
+		oauthLatencyMetric.WithLabelValues("renew").Observe(taken)
+	}
+
+	return token, err
+}
+
+// FIXME Rename once we identify that things are stable
+// getToken retrieves a code from the provider, extracts and verified the token
+func _getToken(config *_oauth2.Config, grantType, code string) (*_oauth2.Token, error) {
+	ctx := context.Background()
+	start := time.Now()
+	token, err := config.Exchange(ctx, code)
+	if err != nil {
+		return token, err
+	}
+	taken := time.Since(start).Seconds()
+	switch grantType {
+	case GrantTypeAuthCode:
+		oauthTokensMetric.WithLabelValues("exchange").Inc()
+		oauthLatencyMetric.WithLabelValues("exchange").Observe(taken)
+	case GrantTypeRefreshToken:
 		oauthTokensMetric.WithLabelValues("renew").Inc()
 		oauthLatencyMetric.WithLabelValues("renew").Observe(taken)
 	}

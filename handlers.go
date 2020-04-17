@@ -17,6 +17,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -31,7 +32,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/go-oidc/oauth2"
 	"github.com/coreos/go-oidc/oidc"
 
 	"github.com/go-chi/chi"
@@ -72,7 +72,7 @@ func (r *oauthProxy) oauthAuthorizationHandler(w http.ResponseWriter, req *http.
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
-	client, err := r.getOAuthClient(r.getRedirectionURL(w, req), getClientAuthMethod(r.config.ClientAuthMethod))
+	client, err := r.getOAuthConf(r.getRedirectionURL(w, req))
 	if err != nil {
 		r.log.Error("failed to retrieve the oauth client for authorization", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -85,7 +85,7 @@ func (r *oauthProxy) oauthAuthorizationHandler(w http.ResponseWriter, req *http.
 		accessType = "offline"
 	}
 
-	authURL := client.AuthCodeURL(req.URL.Query().Get("state"), accessType, "")
+	authURL := client.AuthCodeURL(req.URL.Query().Get("state"))
 	r.log.Debug("incoming authorization request from client address",
 		zap.String("access_type", accessType),
 		zap.String("auth_url", authURL),
@@ -104,18 +104,6 @@ func (r *oauthProxy) oauthAuthorizationHandler(w http.ResponseWriter, req *http.
 	r.redirectToURL(authURL, w, req, http.StatusTemporaryRedirect)
 }
 
-// getClientAuthMethod maps the config value CLIENT_AUTH_METHOD to valid OAuth2 auth method keys
-func getClientAuthMethod(authMethod string) string {
-	switch authMethod {
-	case authMethodBasic:
-		return oauth2.AuthMethodClientSecretBasic
-	case authMethodBody:
-		return oauth2.AuthMethodClientSecretPost
-	default:
-		return ""
-	}
-}
-
 // oauthCallbackHandler is responsible for handling the response from oauth service
 func (r *oauthProxy) oauthCallbackHandler(w http.ResponseWriter, req *http.Request) {
 	if r.config.SkipTokenVerification {
@@ -129,14 +117,14 @@ func (r *oauthProxy) oauthCallbackHandler(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	client, err := r.getOAuthClient(r.getRedirectionURL(w, req), getClientAuthMethod(r.config.ClientAuthMethod))
-	if err != nil {
-		r.log.Error("unable to create a oauth2 client", zap.Error(err))
+	conf, _err := r.getOAuthConf(r.getRedirectionURL(w, req))
+	if _err != nil {
+		r.log.Error("unable to create a oauth2 configuration", zap.Error(_err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	resp, err := exchangeAuthenticationCode(client, code)
+	resp, err := exchangeAuthenticationCode(conf, code)
 	if err != nil {
 		r.log.Error("unable to exchange code for access token", zap.Error(err))
 		r.accessForbidden(w, req)
@@ -146,12 +134,20 @@ func (r *oauthProxy) oauthCallbackHandler(w http.ResponseWriter, req *http.Reque
 	// Flow: once we exchange the authorization code we parse the ID Token; we then check for an access token,
 	// if an access token is present and we can decode it, we use that as the session token, otherwise we default
 	// to the ID Token.
-	token, identity, err := parseToken(resp.IDToken)
+	rawIDToken, ok := resp.Extra("id_token").(string)
+	if !ok {
+		r.log.Error("unable to obtain id token", zap.Error(err))
+		r.accessForbidden(w, req)
+		return
+	}
+
+	token, identity, err := parseToken(rawIDToken)
 	if err != nil {
 		r.log.Error("unable to parse id token for identity", zap.Error(err))
 		r.accessForbidden(w, req)
 		return
 	}
+
 	access, id, err := parseToken(resp.AccessToken)
 	if err == nil {
 		token = access
@@ -195,7 +191,7 @@ func (r *oauthProxy) oauthCallbackHandler(w http.ResponseWriter, req *http.Reque
 			return
 		}
 		// drop in the access token - cookie expiration = access token
-		r.dropAccessTokenCookie(req, w, accessToken, r.getAccessCookieExpiration(token, resp.RefreshToken))
+		r.dropAccessTokenCookie(req, w, accessToken, r.getAccessCookieExpiration(resp.RefreshToken))
 
 		var expiration time.Duration
 		// notes: not all idp refresh tokens are readable, google for example, so we attempt to decode into
@@ -235,6 +231,8 @@ func (r *oauthProxy) oauthCallbackHandler(w http.ResponseWriter, req *http.Reque
 // loginHandler provide's a generic endpoint for clients to perform a user_credentials login to the provider
 func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 	errorMsg, code, err := func() (string, int, error) {
+		ctx := context.Background()
+
 		if !r.config.EnableLoginHandler {
 			return "attempt to login when login handler is disabled", http.StatusNotImplemented, errors.New("login handler disabled")
 		}
@@ -244,15 +242,17 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 			return "request does not have both username and password", http.StatusBadRequest, errors.New("no credentials")
 		}
 
-		client, err := r.client.OAuthClient()
+		conf, err := r.getOAuthConf(r.getRedirectionURL(w, req))
+
 		if err != nil {
 			return "unable to create the oauth client for user_credentials request", http.StatusInternalServerError, err
 		}
 
 		start := time.Now()
-		token, err := client.UserCredsToken(username, password)
+		token, err := conf.PasswordCredentialsToken(ctx, username, password)
+
 		if err != nil {
-			if strings.HasPrefix(err.Error(), oauth2.ErrorInvalidGrant) {
+			if !token.Valid() {
 				return "invalid user credentials provided", http.StatusUnauthorized, err
 			}
 			return "unable to request the access token via grant_type 'password'", http.StatusInternalServerError, err
@@ -271,12 +271,21 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 		oauthTokensMetric.WithLabelValues("login").Inc()
 
 		w.Header().Set("Content-Type", "application/json")
+		idToken, ok := token.Extra("id_token").(string)
+		if !ok {
+			return "", http.StatusInternalServerError, fmt.Errorf("token response does not contain an id_token")
+		}
+		expiresIn, ok := token.Extra("expires_in").(float64)
+		if !ok {
+			return "", http.StatusInternalServerError, fmt.Errorf("token response does not contain expires_in")
+		}
+		scope, _ := token.Extra("scope").(string)
 		if err := json.NewEncoder(w).Encode(tokenResponse{
-			IDToken:      token.IDToken,
+			IDToken:      idToken,
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
-			ExpiresIn:    token.Expires,
-			Scope:        token.Scope,
+			ExpiresIn:    expiresIn,
+			Scope:        scope,
 		}); err != nil {
 			return "", http.StatusInternalServerError, err
 		}
@@ -332,7 +341,7 @@ func (r *oauthProxy) logoutHandler(w http.ResponseWriter, req *http.Request) {
 	// step: check if the user has a state session and if so revoke it
 	if r.useStore() {
 		go func() {
-			if err := r.DeleteRefreshToken(user.token); err != nil {
+			if err = r.DeleteRefreshToken(user.token); err != nil {
 				r.log.Error("unable to remove the refresh token from store", zap.Error(err))
 			}
 		}()
@@ -366,13 +375,12 @@ func (r *oauthProxy) logoutHandler(w http.ResponseWriter, req *http.Request) {
 
 	// step: do we have a revocation endpoint?
 	if revocationURL != "" {
-		client, err := r.client.OAuthClient()
+		client := &http.Client{Timeout: 5 * time.Second}
 		if err != nil {
 			r.log.Error("unable to retrieve the openid client", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
 		// step: add the authentication headers
 		encodedID := url.QueryEscape(r.config.ClientID)
 		encodedSecret := url.QueryEscape(r.config.ClientSecret)
@@ -390,7 +398,7 @@ func (r *oauthProxy) logoutHandler(w http.ResponseWriter, req *http.Request) {
 		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		start := time.Now()
-		response, err := client.HttpClient().Do(request)
+		response, err := client.Do(request)
 		if err != nil {
 			r.log.Error("unable to post to revocation endpoint", zap.Error(err))
 			return

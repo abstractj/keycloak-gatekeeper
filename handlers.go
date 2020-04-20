@@ -195,7 +195,7 @@ func (r *oauthProxy) oauthCallbackHandler(w http.ResponseWriter, req *http.Reque
 			return
 		}
 		// drop in the access token - cookie expiration = access token
-		r.dropAccessTokenCookie(req, w, accessToken, r.getAccessCookieExpiration(token, resp.RefreshToken))
+		r.dropAccessTokenCookie(req, w, accessToken, r.getAccessCookieExpiration(resp.RefreshToken))
 
 		var expiration time.Duration
 		// notes: not all idp refresh tokens are readable, google for example, so we attempt to decode into

@@ -276,7 +276,6 @@ func TestDecryptDataBlock(t *testing.T) {
 			t.Errorf("test case: %d are not the same", i)
 		}
 	}
-
 }
 
 func TestHasAccessOK(t *testing.T) {

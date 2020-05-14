@@ -47,7 +47,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v0.1.7
+        uses: golangci/golangci-lint-action@v0.1.8
         with:
-          version: v1.26
+          version: v1.27
           github-token: "${{ secrets.GITHUB_TOKEN }}"

@@ -1,4 +1,4 @@
-# Test Louketo Proxy
+# Testing Louketo Proxy
 
 This repository contains the source code for the Louketo Proxy.
 

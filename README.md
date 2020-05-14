@@ -1,4 +1,4 @@
-# Louketo Proxy
+# Louketo Proxy2
 
 This repository contains the source code for the Louketo Proxy.
 

@@ -45,15 +45,3 @@ jobs:
         run: |
           GO111MODULE=off go get github.com/mattn/goveralls
           $(go env GOPATH)/bin/goveralls -coverprofile=profile.cov -service=github
-  # Run the linter as a separate job
-  golangci:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v0.1.8
-        with:
-          version: v1.27
-          github-token: "${{ secrets.GITHUB_TOKEN }}"

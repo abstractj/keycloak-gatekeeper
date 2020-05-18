@@ -29,6 +29,7 @@ import (
 
 	"github.com/coreos/go-oidc/jose"
 	"github.com/coreos/go-oidc/oauth2"
+
 	"github.com/coreos/go-oidc/oidc"
 )
 
@@ -83,7 +84,7 @@ func getRefreshedToken(client *oidc.Client, t string) (jose.JWT, string, time.Ti
 	if err != nil {
 		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
 	}
-	response, err := getToken(cl, oauth2.GrantTypeRefreshToken, t)
+	response, err := getToken(cl, GrantTypeRefreshToken, t)
 	if err != nil {
 		if strings.Contains(err.Error(), "refresh token has expired") {
 			return jose.JWT{}, "", time.Time{}, time.Duration(0), ErrRefreshTokenExpired
@@ -114,7 +115,7 @@ func getRefreshedToken(client *oidc.Client, t string) (jose.JWT, string, time.Ti
 
 // exchangeAuthenticationCode exchanges the authentication code with the oauth server for a access token
 func exchangeAuthenticationCode(client *_oauth2.Config, code string) (*_oauth2.Token, error) {
-	return _getToken(client, oauth2.GrantTypeAuthCode, code)
+	return _getToken(client, GrantTypeAuthCode, code)
 }
 
 // DEPRECATED: Never used. To be removed in the future.

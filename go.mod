@@ -22,15 +22,16 @@ require (
 	github.com/prometheus/client_golang v0.9.2
 	github.com/rs/cors v1.6.0
 	github.com/satori/go.uuid v1.2.0
-	github.com/stretchr/testify v1.2.2
+	github.com/square/go-jose/v3 v3.0.0-20200430180204-d84c719419c2
+	github.com/stretchr/testify v1.5.1
 	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
 	github.com/urfave/cli v0.0.0-20181029213200-b67dcf995b6a
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.9.1
-	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
-	golang.org/x/net v0.0.0-20190108225652-1e06a53dbb7e
+	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7
+	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200302083256-062a44052db1 // indirect
 	gopkg.in/bsm/ratelimit.v1 v1.0.0-20160220154919-db14e161995a // indirect

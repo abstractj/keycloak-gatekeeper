@@ -120,14 +120,14 @@ func exchangeAuthenticationCode(client *_oauth2.Config, code string) (*_oauth2.T
 
 // DEPRECATED: Never used. To be removed in the future.
 // getUserinfo is responsible for getting the userinfo from the IDPD
-func getUserinfo(client *oauth2.Client, endpoint string, token string) (jose.Claims, error) {
+// use as an http.Client
+func getUserinfo(client *http.Client, endpoint string, token string) (jose.Claims, error) {
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set(authorizationHeader, fmt.Sprintf("Bearer %s", token))
-
-	resp, err := client.HttpClient().Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

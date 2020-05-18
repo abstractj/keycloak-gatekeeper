@@ -16,6 +16,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
@@ -27,6 +28,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	_oauth2 "golang.org/x/oauth2"
 
 	"github.com/coreos/go-oidc/jose"
 	"github.com/go-chi/chi"
@@ -277,7 +280,10 @@ func (r *fakeAuthServer) tokenHandler(w http.ResponseWriter, req *http.Request) 
 func TestGetUserinfo(t *testing.T) {
 	px, idp, _ := newTestProxyService(nil)
 	token := newTestToken(idp.getLocation()).getToken()
-	client, _ := px.client.OAuthClient()
+	tokenSource := _oauth2.StaticTokenSource(
+		&_oauth2.Token{AccessToken: token.Encode()},
+	)
+	client := _oauth2.NewClient(context.Background(), tokenSource)
 	claims, err := getUserinfo(client, px.idp.UserInfoEndpoint.String(), token.Encode())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, claims)

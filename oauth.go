@@ -40,11 +40,6 @@ const (
 	GrantTypeRefreshToken = "refresh_token"
 )
 
-//FIXME remove constants in the future which hopefully won't be necessary in the next releases
-const (
-	ErrorInvalidGrant = "invalid_grant"
-)
-
 // getOAuthConf returns a oauth2 config
 func (r *oauthProxy) getOAuthConf(redirectionURL string) (*_oauth2.Config, error) {
 	conf := &_oauth2.Config{

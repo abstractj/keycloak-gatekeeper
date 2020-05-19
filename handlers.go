@@ -271,8 +271,14 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 		oauthTokensMetric.WithLabelValues("login").Inc()
 
 		w.Header().Set("Content-Type", "application/json")
-		idToken, _ := token.Extra("id_token").(string)
-		expiresIn, _ := token.Extra("expires_in").(float64)
+		idToken, ok := token.Extra("id_token").(string)
+		if !ok {
+			return "", http.StatusInternalServerError, fmt.Errorf("token response does not contain an id_token")
+		}
+		expiresIn, ok := token.Extra("expires_in").(float64)
+		if !ok {
+			return "", http.StatusInternalServerError, fmt.Errorf("token response does not contain expires_in")
+		}
 		scope, _ := token.Extra("scope").(string)
 		if err := json.NewEncoder(w).Encode(tokenResponse{
 			IDToken:      idToken,

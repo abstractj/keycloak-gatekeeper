@@ -252,7 +252,7 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 		token, err := conf.PasswordCredentialsToken(ctx, username, password)
 
 		if err != nil {
-			if strings.HasPrefix(err.Error(), ErrorInvalidGrant) {
+			if !token.Valid() {
 				return "invalid user credentials provided", http.StatusUnauthorized, err
 			}
 			return "unable to request the access token via grant_type 'password'", http.StatusInternalServerError, err
@@ -271,13 +271,15 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 		oauthTokensMetric.WithLabelValues("login").Inc()
 
 		w.Header().Set("Content-Type", "application/json")
-
+		idToken, _ := token.Extra("id_token").(string)
+		expiresIn, _ := token.Extra("expires_in").(float64)
+		scope, _ := token.Extra("scope").(string)
 		if err := json.NewEncoder(w).Encode(tokenResponse{
-			IDToken:      token.Extra("id_token").(string),
+			IDToken:      idToken,
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
-			ExpiresIn:    token.Extra("expires_in").(float64),
-			Scope:        token.Extra("scope").(string),
+			ExpiresIn:    expiresIn,
+			Scope:        scope,
 		}); err != nil {
 			return "", http.StatusInternalServerError, err
 		}

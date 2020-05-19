@@ -17,6 +17,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -230,6 +231,8 @@ func (r *oauthProxy) oauthCallbackHandler(w http.ResponseWriter, req *http.Reque
 // loginHandler provide's a generic endpoint for clients to perform a user_credentials login to the provider
 func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 	errorMsg, code, err := func() (string, int, error) {
+		ctx := context.Background()
+
 		if !r.config.EnableLoginHandler {
 			return "attempt to login when login handler is disabled", http.StatusNotImplemented, errors.New("login handler disabled")
 		}
@@ -239,13 +242,15 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 			return "request does not have both username and password", http.StatusBadRequest, errors.New("no credentials")
 		}
 
-		client, err := r.client.OAuthClient()
+		conf, err := r.getOAuthConf(r.getRedirectionURL(w, req))
+
 		if err != nil {
 			return "unable to create the oauth client for user_credentials request", http.StatusInternalServerError, err
 		}
 
 		start := time.Now()
-		token, err := client.UserCredsToken(username, password)
+		token, err := conf.PasswordCredentialsToken(ctx, username, password)
+
 		if err != nil {
 			if strings.HasPrefix(err.Error(), ErrorInvalidGrant) {
 				return "invalid user credentials provided", http.StatusUnauthorized, err
@@ -266,12 +271,13 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 		oauthTokensMetric.WithLabelValues("login").Inc()
 
 		w.Header().Set("Content-Type", "application/json")
+
 		if err := json.NewEncoder(w).Encode(tokenResponse{
-			IDToken:      token.IDToken,
+			IDToken:      token.Extra("id_token").(string),
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
-			ExpiresIn:    token.Expires,
-			Scope:        token.Scope,
+			ExpiresIn:    token.Extra("expires_in").(int),
+			Scope:        token.Extra("scope").(string),
 		}); err != nil {
 			return "", http.StatusInternalServerError, err
 		}

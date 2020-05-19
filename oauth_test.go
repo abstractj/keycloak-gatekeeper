@@ -255,7 +255,7 @@ func (r *fakeAuthServer) tokenHandler(w http.ResponseWriter, req *http.Request) 
 				IDToken:      token.Encode(),
 				AccessToken:  token.Encode(),
 				RefreshToken: token.Encode(),
-				ExpiresIn:    expires.UTC().Second(),
+				ExpiresIn:    float64(expires.UTC().Second()),
 			})
 			return
 		}
@@ -270,7 +270,7 @@ func (r *fakeAuthServer) tokenHandler(w http.ResponseWriter, req *http.Request) 
 			IDToken:      token.Encode(),
 			AccessToken:  token.Encode(),
 			RefreshToken: token.Encode(),
-			ExpiresIn:    expires.Second(),
+			ExpiresIn:    float64(expires.Second()),
 		})
 	default:
 		w.WriteHeader(http.StatusBadRequest)

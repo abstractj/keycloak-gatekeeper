@@ -276,7 +276,7 @@ func (r *oauthProxy) loginHandler(w http.ResponseWriter, req *http.Request) {
 			IDToken:      token.Extra("id_token").(string),
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
-			ExpiresIn:    token.Extra("expires_in").(int),
+			ExpiresIn:    token.Extra("expires_in").(float64),
 			Scope:        token.Extra("scope").(string),
 		}); err != nil {
 			return "", http.StatusInternalServerError, err

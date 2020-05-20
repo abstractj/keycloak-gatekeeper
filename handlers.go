@@ -375,13 +375,12 @@ func (r *oauthProxy) logoutHandler(w http.ResponseWriter, req *http.Request) {
 
 	// step: do we have a revocation endpoint?
 	if revocationURL != "" {
-		client, err := r.client.OAuthClient()
+		client := &http.Client{Timeout: 5 * time.Second}
 		if err != nil {
 			r.log.Error("unable to retrieve the openid client", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
 		// step: add the authentication headers
 		encodedID := url.QueryEscape(r.config.ClientID)
 		encodedSecret := url.QueryEscape(r.config.ClientSecret)
@@ -399,7 +398,7 @@ func (r *oauthProxy) logoutHandler(w http.ResponseWriter, req *http.Request) {
 		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		start := time.Now()
-		response, err := client.HttpClient().Do(request)
+		response, err := client.Do(request)
 		if err != nil {
 			r.log.Error("unable to post to revocation endpoint", zap.Error(err))
 			return

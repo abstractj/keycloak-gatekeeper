@@ -93,7 +93,7 @@ func getRefreshedToken(conf *oauth2.Config, t string) (jose.JWT, string, time.Ti
 
 // exchangeAuthenticationCode exchanges the authentication code with the oauth server for a access token
 func exchangeAuthenticationCode(client *oauth2.Config, code string) (*oauth2.Token, error) {
-	return _getToken(client, GrantTypeAuthCode, code)
+	return getToken(client, GrantTypeAuthCode, code)
 }
 
 // getUserinfo is responsible for getting the userinfo from the IDPD
@@ -124,9 +124,8 @@ func getUserinfo(client *http.Client, endpoint string, token string) (jose.Claim
 	return claims, nil
 }
 
-// FIXME Rename once we identify that things are stable
 // getToken retrieves a code from the provider, extracts and verified the token
-func _getToken(config *oauth2.Config, grantType, code string) (*oauth2.Token, error) {
+func getToken(config *oauth2.Config, grantType, code string) (*oauth2.Token, error) {
 	ctx := context.Background()
 	start := time.Now()
 	token, err := config.Exchange(ctx, code)

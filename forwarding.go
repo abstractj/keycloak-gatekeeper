@@ -161,7 +161,7 @@ func (r *oauthProxy) forwardProxyHandler() func(*http.Request, *http.Response) {
 						r.log.Error("failed to create oauth2 conf", zap.Error(err))
 					}
 					// step: attempt to refresh the access
-					token, newRefreshToken, expiration, _, err := _getRefreshedToken(conf, state.refresh)
+					token, newRefreshToken, expiration, _, err := getRefreshedToken(conf, state.refresh)
 					if err != nil {
 						state.login = true
 						switch err {

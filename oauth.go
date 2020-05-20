@@ -73,7 +73,7 @@ func verifyToken(client *oidc.Client, token jose.JWT) error {
 // NOTE: we may be able to extract the specific (non-standard) claim refresh_expires_in and refresh_expires
 // from response.RawBody.
 // When not available, keycloak provides us with the same (for now) expiry value for ID token.
-func _getRefreshedToken(conf *oauth2.Config, t string) (jose.JWT, string, time.Time, time.Duration, error) {
+func getRefreshedToken(conf *oauth2.Config, t string) (jose.JWT, string, time.Time, time.Duration, error) {
 	tokenSource := conf.TokenSource(context.Background(), &oauth2.Token{RefreshToken: t})
 	tkn, err := tokenSource.Token()
 	if err != nil {

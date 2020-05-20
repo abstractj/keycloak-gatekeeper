@@ -180,7 +180,7 @@ func (r *oauthProxy) authenticationMiddleware() func(http.Handler) http.Handler 
 					if err != nil {
 						r.log.Error("failed to create oauth2 conf", zap.Error(err))
 					}
-					token, newRefreshToken, accessExpiresAt, refreshExpiresIn, err := _getRefreshedToken(conf, refresh)
+					token, newRefreshToken, accessExpiresAt, refreshExpiresIn, err := getRefreshedToken(conf, refresh)
 					if err != nil {
 						switch err {
 						case ErrRefreshTokenExpired:

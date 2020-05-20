@@ -341,7 +341,7 @@ func (r *oauthProxy) logoutHandler(w http.ResponseWriter, req *http.Request) {
 	// step: check if the user has a state session and if so revoke it
 	if r.useStore() {
 		go func() {
-			if err := r.DeleteRefreshToken(user.token); err != nil {
+			if err = r.DeleteRefreshToken(user.token); err != nil {
 				r.log.Error("unable to remove the refresh token from store", zap.Error(err))
 			}
 		}()

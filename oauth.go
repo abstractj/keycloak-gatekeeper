@@ -108,6 +108,33 @@ func getRefreshedToken(client *oidc.Client, t string) (jose.JWT, string, time.Ti
 	return token, response.RefreshToken, identity.ExpiresAt, refreshExpiresIn, nil
 }
 
+// getRefreshedToken attempts to refresh the access token, returning the parsed token, optionally with a renewed
+// refresh token and the time the access and refresh tokens expire
+//
+// NOTE: we may be able to extract the specific (non-standard) claim refresh_expires_in and refresh_expires
+// from response.RawBody.
+// When not available, keycloak provides us with the same (for now) expiry value for ID token.
+func _getRefreshedToken(conf *_oauth2.Config, t string) (jose.JWT, string, time.Time, time.Duration, error) {
+	response, err := _getToken(conf, GrantTypeRefreshToken, t)
+	if err != nil {
+		if strings.Contains(err.Error(), "refresh token has expired") {
+			return jose.JWT{}, "", time.Time{}, time.Duration(0), ErrRefreshTokenExpired
+		}
+		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
+	}
+	refreshExpiresIn, ok := response.Extra("refresh_expires_in").(time.Duration)
+	if !ok {
+		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
+	}
+
+	token, identity, err := parseToken(response.AccessToken)
+	if err != nil {
+		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
+	}
+
+	return token, response.RefreshToken, identity.ExpiresAt, refreshExpiresIn, nil
+}
+
 // exchangeAuthenticationCode exchanges the authentication code with the oauth server for a access token
 func exchangeAuthenticationCode(client *_oauth2.Config, code string) (*_oauth2.Token, error) {
 	return _getToken(client, GrantTypeAuthCode, code)

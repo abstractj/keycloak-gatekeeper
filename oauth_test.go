@@ -29,7 +29,7 @@ import (
 	"testing"
 	"time"
 
-	_oauth2 "golang.org/x/oauth2"
+	"golang.org/x/oauth2"
 
 	"github.com/coreos/go-oidc/jose"
 	"github.com/go-chi/chi"
@@ -280,10 +280,10 @@ func (r *fakeAuthServer) tokenHandler(w http.ResponseWriter, req *http.Request) 
 func TestGetUserinfo(t *testing.T) {
 	px, idp, _ := newTestProxyService(nil)
 	token := newTestToken(idp.getLocation()).getToken()
-	tokenSource := _oauth2.StaticTokenSource(
-		&_oauth2.Token{AccessToken: token.Encode()},
+	tokenSource := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token.Encode()},
 	)
-	client := _oauth2.NewClient(context.Background(), tokenSource)
+	client := oauth2.NewClient(context.Background(), tokenSource)
 	claims, err := getUserinfo(client, px.idp.UserInfoEndpoint.String(), token.Encode())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, claims)

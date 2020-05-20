@@ -18,11 +18,9 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v0.9.2
 	github.com/rs/cors v1.6.0
 	github.com/satori/go.uuid v1.2.0
-	github.com/square/go-jose/v3 v3.0.0-20200430180204-d84c719419c2
 	github.com/stretchr/testify v1.5.1
 	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
 	github.com/urfave/cli v0.0.0-20181029213200-b67dcf995b6a

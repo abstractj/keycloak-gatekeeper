@@ -156,8 +156,12 @@ func (r *oauthProxy) forwardProxyHandler() func(*http.Request, *http.Response) {
 						zap.String("email", state.identity.Email),
 						zap.String("expires", state.expiration.Format(time.RFC3339)))
 
+					conf, err := r.getOAuthConf(r.config.RedirectionURL)
+					if err != nil {
+						r.log.Error("failed to create oauth2 conf", zap.Error(err))
+					}
 					// step: attempt to refresh the access
-					token, newRefreshToken, expiration, _, err := getRefreshedToken(r.client, state.refresh)
+					token, newRefreshToken, expiration, _, err := _getRefreshedToken(conf, state.refresh)
 					if err != nil {
 						state.login = true
 						switch err {

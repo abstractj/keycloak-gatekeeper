@@ -25,10 +25,9 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
-	_oauth2 "golang.org/x/oauth2"
+	"golang.org/x/oauth2"
 
 	"github.com/coreos/go-oidc/jose"
-	"github.com/coreos/go-oidc/oauth2"
 
 	"github.com/coreos/go-oidc/oidc"
 )
@@ -41,11 +40,11 @@ const (
 )
 
 // getOAuthConf returns a oauth2 config
-func (r *oauthProxy) getOAuthConf(redirectionURL string) (*_oauth2.Config, error) {
-	conf := &_oauth2.Config{
+func (r *oauthProxy) getOAuthConf(redirectionURL string) (*oauth2.Config, error) {
+	conf := &oauth2.Config{
 		ClientID:     r.config.ClientID,
 		ClientSecret: r.config.ClientSecret,
-		Endpoint: _oauth2.Endpoint{
+		Endpoint: oauth2.Endpoint{
 			AuthURL:  r.idp.AuthEndpoint.String(),
 			TokenURL: r.idp.TokenEndpoint.String(),
 		},
@@ -74,48 +73,8 @@ func verifyToken(client *oidc.Client, token jose.JWT) error {
 // NOTE: we may be able to extract the specific (non-standard) claim refresh_expires_in and refresh_expires
 // from response.RawBody.
 // When not available, keycloak provides us with the same (for now) expiry value for ID token.
-func getRefreshedToken(client *oidc.Client, t string) (jose.JWT, string, time.Time, time.Duration, error) {
-	cl, err := client.OAuthClient()
-	if err != nil {
-		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
-	}
-	response, err := getToken(cl, GrantTypeRefreshToken, t)
-	if err != nil {
-		if strings.Contains(err.Error(), "refresh token has expired") {
-			return jose.JWT{}, "", time.Time{}, time.Duration(0), ErrRefreshTokenExpired
-		}
-		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
-	}
-
-	// extracts non-standard claims about refresh token, to get refresh token expiry
-	var (
-		refreshExpiresIn time.Duration
-		extraClaims      struct {
-			RefreshExpiresIn json.Number `json:"refresh_expires_in"`
-		}
-	)
-	_ = json.Unmarshal(response.RawBody, &extraClaims)
-	if extraClaims.RefreshExpiresIn != "" {
-		if asInt, erj := extraClaims.RefreshExpiresIn.Int64(); erj == nil {
-			refreshExpiresIn = time.Duration(asInt) * time.Second
-		}
-	}
-	token, identity, err := parseToken(response.AccessToken)
-	if err != nil {
-		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
-	}
-
-	return token, response.RefreshToken, identity.ExpiresAt, refreshExpiresIn, nil
-}
-
-// getRefreshedToken attempts to refresh the access token, returning the parsed token, optionally with a renewed
-// refresh token and the time the access and refresh tokens expire
-//
-// NOTE: we may be able to extract the specific (non-standard) claim refresh_expires_in and refresh_expires
-// from response.RawBody.
-// When not available, keycloak provides us with the same (for now) expiry value for ID token.
-func _getRefreshedToken(conf *_oauth2.Config, t string) (jose.JWT, string, time.Time, time.Duration, error) {
-	tokenSource := conf.TokenSource(context.Background(), &_oauth2.Token{RefreshToken: t})
+func _getRefreshedToken(conf *oauth2.Config, t string) (jose.JWT, string, time.Time, time.Duration, error) {
+	tokenSource := conf.TokenSource(context.Background(), &oauth2.Token{RefreshToken: t})
 	tkn, err := tokenSource.Token()
 	if err != nil {
 		if strings.Contains(err.Error(), "refresh token has expired") {
@@ -133,7 +92,7 @@ func _getRefreshedToken(conf *_oauth2.Config, t string) (jose.JWT, string, time.
 }
 
 // exchangeAuthenticationCode exchanges the authentication code with the oauth server for a access token
-func exchangeAuthenticationCode(client *_oauth2.Config, code string) (*_oauth2.Token, error) {
+func exchangeAuthenticationCode(client *oauth2.Config, code string) (*oauth2.Token, error) {
 	return _getToken(client, GrantTypeAuthCode, code)
 }
 
@@ -165,30 +124,9 @@ func getUserinfo(client *http.Client, endpoint string, token string) (jose.Claim
 	return claims, nil
 }
 
-// DEPRECATED To be removed in the future and replaced by _getToken
-// getToken retrieves a code from the provider, extracts and verified the token
-func getToken(client *oauth2.Client, grantType, code string) (oauth2.TokenResponse, error) {
-	start := time.Now()
-	token, err := client.RequestToken(grantType, code)
-	if err != nil {
-		return token, err
-	}
-	taken := time.Since(start).Seconds()
-	switch grantType {
-	case GrantTypeAuthCode:
-		oauthTokensMetric.WithLabelValues("exchange").Inc()
-		oauthLatencyMetric.WithLabelValues("exchange").Observe(taken)
-	case GrantTypeRefreshToken:
-		oauthTokensMetric.WithLabelValues("renew").Inc()
-		oauthLatencyMetric.WithLabelValues("renew").Observe(taken)
-	}
-
-	return token, err
-}
-
 // FIXME Rename once we identify that things are stable
 // getToken retrieves a code from the provider, extracts and verified the token
-func _getToken(config *_oauth2.Config, grantType, code string) (*_oauth2.Token, error) {
+func _getToken(config *oauth2.Config, grantType, code string) (*oauth2.Token, error) {
 	ctx := context.Background()
 	start := time.Now()
 	token, err := config.Exchange(ctx, code)

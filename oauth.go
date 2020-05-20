@@ -113,7 +113,6 @@ func exchangeAuthenticationCode(client *_oauth2.Config, code string) (*_oauth2.T
 	return _getToken(client, GrantTypeAuthCode, code)
 }
 
-// DEPRECATED: Never used. To be removed in the future.
 // getUserinfo is responsible for getting the userinfo from the IDPD
 // use as an http.Client
 func getUserinfo(client *http.Client, endpoint string, token string) (jose.Claims, error) {

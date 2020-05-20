@@ -16,6 +16,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -79,7 +80,10 @@ func (r *oauthProxy) proxyMiddleware(next http.Handler) http.Handler {
 
 // forwardProxyHandler is responsible for signing outbound requests
 func (r *oauthProxy) forwardProxyHandler() func(*http.Request, *http.Response) {
-	client, err := r.client.OAuthClient()
+	//TODO
+	ctx := context.Background()
+	conf, err := r.getOAuthConf(r.config.RedirectionURL)
+
 	if err != nil {
 		r.log.Fatal("failed to create oauth client", zap.Error(err))
 	}
@@ -111,7 +115,7 @@ func (r *oauthProxy) forwardProxyHandler() func(*http.Request, *http.Response) {
 					zap.String("username", r.config.ForwardingUsername))
 
 				// step: login into the service
-				resp, err := client.UserCredsToken(r.config.ForwardingUsername, r.config.ForwardingPassword)
+				resp, err := conf.PasswordCredentialsToken(ctx, r.config.ForwardingUsername, r.config.ForwardingPassword)
 				if err != nil {
 					r.log.Error("failed to login to authentication service", zap.Error(err))
 					// step: back-off and reschedule

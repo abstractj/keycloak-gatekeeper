@@ -81,7 +81,7 @@ func getRefreshedToken(conf *oauth2.Config, t string) (jose.JWT, string, time.Ti
 		}
 		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
 	}
-	refreshExpiresIn := time.Duration(tkn.Expiry.Nanosecond())
+	refreshExpiresIn := time.Until(tkn.Expiry)
 	token, identity, err := parseToken(tkn.AccessToken)
 	if err != nil {
 		return jose.JWT{}, "", time.Time{}, time.Duration(0), err
